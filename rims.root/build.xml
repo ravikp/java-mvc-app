@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="rims" basedir=".">
+
+    <property file="tomcatTasks.properties"/>
+    <property file="tomcat.properties"/>
+
+    <property name="name" value="rims"/>
+    <property name="src.dir" value="main/src"/>
+    <property name="web.dir" value="web"/>
+    <property name="web.inf" value="${web.dir}/WEB-INF/"/>
+    <property name="web.inf.lib" value="${web.inf}/lib/"/>
+    <property name="build.dir" value="${web.inf}/classes/"/>
+    <property name="dist" value="dist"/>
+    <property name="dist.war.file" value="${dist}/${name}.war"/>
+
+    <path id="master-classpath">
+        <fileset dir="${web.inf.lib}">
+            <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${appserver.lib}">
+            <include name="servlet*.jar"/>
+        </fileset>
+        <pathelement path="${build.dir}"/>
+    </path>
+
+    <target name="usage">
+        <echo message=""/>
+        <echo message="${name} build file"/>
+        <echo message="-------------------"/>
+        <echo message="available targets are"/>
+        <echo message="build     --> Build the application"/>
+        <echo message="deploy    --> Deploy application as directory"/>
+        <echo message="deploywar --> Deploy application as a WAR file"/>
+        <echo message="install   --> Install application in Tomcat"/>
+        <echo message="reload    --> Reload application in Tomcat"/>
+        <echo message="start     --> Start Tomcat application"/>
+        <echo message="stop      --> Stop Tomcat application"/>
+        <echo message="list      --> List Tomcat applications"/>
+        <echo message=""/>
+    </target>
+
+    <target name="build">
+        <mkdir dir="${build.dir}"/>
+        <javac destdir="${build.dir}" source="1.5" target="1.5" debug="true">
+            <src path="${src.dir}">
+            </src>
+            <classpath refid="master-classpath">
+            </classpath>
+        </javac>
+    </target>
+    
+    <target name="deploy" depends="build">
+        <copy todir="${deploy.path}/${name}" preservelastmodified="true">
+            <fileset dir="${web.dir}">
+                <include name="**/*.*"/>
+            </fileset>
+        </copy>        
+    </target>
+
+    <target name="redeploy" depends="build, undeploy, deploy"/>
+    
+    <path id="catalina-ant-classpath">
+        <fileset dir="${appserver.lib}">
+            <include name="catalina-ant.jar"/>
+        </fileset>
+    </path>
+
+    <taskdef name="install" classname="${install}">
+        <classpath refid="catalina-ant-classpath"/>
+    </taskdef>
+
+    <taskdef name="reload" classname="${reload}">
+        <classpath refid="catalina-ant-classpath"/>
+    </taskdef>
+
+    <taskdef name="list" classname="${list}">
+        <classpath refid="catalina-ant-classpath"/>
+    </taskdef>
+
+    <taskdef name="start" classname="${start}">
+        <classpath refid="catalina-ant-classpath"/>
+    </taskdef>
+
+    <taskdef name="deploy" classname="${deploy}">
+        <classpath refid="catalina-ant-classpath"/>
+    </taskdef>
+
+    <taskdef name="undeploy" classname="${undeploy}">
+        <classpath refid="catalina-ant-classpath"/>
+    </taskdef>
+
+    <taskdef name="stop" classname="${stop}">
+        <classpath refid="catalina-ant-classpath"/>
+    </taskdef>
+
+
+    <target name="reload" description="Reload application in Tomcat">
+        <reload url="${tomcat.manager.url}" username="${tomcat.manager.username}" password="${tomcat.manager.password}"
+                path="/${name}"/>
+    </target>
+
+    <target name="start" description="Start Tomcat application">
+        <start url="${tomcat.manager.url}" username="${tomcat.manager.username}" password="${tomcat.manager.password}"
+               path="/${name}"/>
+    </target>
+
+    <target name="stop" description="Stop Tomcat application">
+        <stop url="${tomcat.manager.url}" username="${tomcat.manager.username}" password="${tomcat.manager.password}"
+              path="/${name}"/>
+    </target>
+
+    <target name="list" description="List Tomcat applications">
+        <list url="${tomcat.manager.url}" username="${tomcat.manager.username}" password="${tomcat.manager.password}"/>
+    </target>
+
+    <target name="make.war" depends="build">
+        <mkdir dir="${dist}"/>
+        <war destfile="${dist}/${name}.war" webxml="${web.inf}/web.xml">
+            <fileset dir="${web.dir}">
+                <include name="**/*.*"/>
+            </fileset>
+        </war>
+    </target>
+
+    <target name="deploy.war" depends="make.war">
+        <deploy url="${tomcat.manager.url}" username="${tomcat.manager.username}" password="${tomcat.manager.password}"
+                path="/${name}" war="${dist.war.file}"/>
+    </target>
+
+    <target name="redeploy.war" depends="make.war, undeploy, deploy.war"/>
+
+    <target name="undeploy">
+        <undeploy url="${tomcat.manager.url}" username="${tomcat.manager.username}" password="${tomcat.manager.password}"
+                path="/${name}" />
+    </target>
+</project>
