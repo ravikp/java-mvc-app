@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Tomcat-Libs">
-    <CLASSES>
-      <root url="jar://C:/softwares/apache-tomcat-6.0.29/lib/catalina-ant.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
