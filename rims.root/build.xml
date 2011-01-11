@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="rims" basedir=".">
 
+    <property environment="env"/>
     <property file="tomcatTasks.properties"/>
     <property file="tomcat.properties"/>
 
@@ -38,6 +39,30 @@
         <echo message="list      --> List Tomcat applications"/>
         <echo message=""/>
     </target>
+
+    <target name="-create.context.symlink">
+        <property name="-meta.inf.file" value="${user.dir}\web\meta-inf\context.xml"/>
+        <property name="-web.app.dir" value="${user.dir}\web\"/>
+
+        <exec executable="cmd">
+            <arg value="/c"/>
+            <arg value="mklink ${tomcat.context.dir}\rims.xml ${-meta.inf.file}"/>
+        </exec>
+
+        <exec executable="cmd">
+            <arg value="/c"/>
+            <arg value="mklink /d ${tomcat.webapps.dir}\rims ${-web.app.dir}"/>
+        </exec>
+
+    </target>
+
+    <target name="-create.rims.webapp.symlink"/>
+
+    <target name="create.symlinks">
+        <antcall target="-create.context.symlink"/>
+        <antcall target="-create.rims.webapp.symlink"/>
+    </target>
+
 
     <target name="build">
         <mkdir dir="${build.dir}"/>
